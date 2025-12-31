@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>產品訂購單計算機</title>
+    <style>
+        /* 基礎設定 */
+        body {
+            background-color: #8aced6; /* 指定背景色 */
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            margin: 0;
+            padding: 20px;
+            padding-bottom: 100px; /* 預留底部固定欄位的空間 */
+        }
+
+        h1, h2, h3 {
+            color: #005ea4;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* 使用說明區塊 */
+        .instructions {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            border-left: 5px solid #005ea4;
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+        }
+
+        /* 產品分類標題 */
+        .category-title {
+            background-color: #fff;
+            color: #005ea4;
+            padding: 10px 20px;
+            border-radius: 30px;
+            margin-top: 40px;
+            margin-bottom: 15px;
+            display: inline-block;
+            font-size: 1.2em;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* 產品卡片 */
+        .product-card {
+            background-color: #005ea4; /* 指定產品區塊背景色 */
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+        }
+
+        .product-name {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .product-price {
+            background-color: #ff9800;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        /* 圖片預留位置 */
+        .product-image-placeholder {
+            width: 100%;
+            height: 150px;
+            background-color: rgba(255,255,255,0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            color: rgba(255,255,255,0.7);
+            font-style: italic;
+        }
+        
+        /* 若您有圖片，可在這裡加入 img 標籤樣式 */
+        .product-image-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        /* 牙間刷尺寸選擇列表 */
+        .size-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+        }
+
+        .size-item {
+            background-color: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .size-info {
+            font-size: 0.9em;
+        }
+        
+        .size-detail {
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+
+        /* 輸入框樣式 */
+        input[type="number"] {
+            width: 60px;
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1em;
+        }
+
+        /* 底部固定結帳欄 */
+        .footer-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #333;
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-sizing: border-box;
+        }
+
+        .total-info {
+            font-size: 1.1em;
+        }
+        
+        .discount-badge {
+            background-color: #ff5722;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+
+        .action-btn {
+            background-color: #8aced6;
+            color: #005ea4;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .action-btn:hover {
+            background-color: #fff;
+        }
+
+        /* 響應式調整 */
+        @media (max-width: 600px) {
+            .footer-bar {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            .size-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>產品訂購單</h1>
+    
+    <div class="instructions">
+        <h3>📢 訂購說明</h3>
+        <p>歡迎選購！請直接在下方產品輸入您需要的數量。</p>
+        <ul>
+            <li><strong>折扣優惠：</strong>
+                <ul>
+                    <li>1-2 盒：9折</li>
+                    <li>3-4 盒：7折</li>
+                    <li>5 盒以上：6折</li>
+                </ul>
+            </li>
+            <li><strong>牙間刷袋裝規則：</strong> 每 2 包視為 1 盒計算折扣。若購買袋裝，<strong>總數量必須是 2 的倍數</strong>。</li>
+            <li>選購完成後，請點擊底部的<strong>「複製訂單內容」</strong>，並傳送至 LINE 官方群組。</li>
+        </ul>
+    </div>
+
+    <div id="product-container"></div>
+
+</div>
+
+<div class="footer-bar">
+    <div class="total-info">
+        <div>總數量(換算盒數): <span id="total-box-count">0</span></div>
+        <div>預估金額: <span id="final-price" style="font-size:1.3em; color:#ffeb3b;">$0</span> <span id="discount-display" class="discount-badge" style="display:none"></span></div>
+    </div>
+    <button class="action-btn" onclick="copyOrder()">複製訂單內容</button>
+</div>
+
+<script>
+    // --- 產品資料設定 ---
+    
+    // 牙間刷尺寸定義
+    const sizesTypeI = [
+        { name: "0號", detail: "0.4mm | SSSS | 粉紅色" },
+        { name: "1號", detail: "0.45mm | SSS |橘色" },
+        { name: "2號", detail: "0.5mm | SS | 紅色" },
+        { name: "3號", detail: "0.6mm | S | 藍色" },
+        { name: "4號", detail: "0.7mm | M | 黃色" },
+        { name: "5號", detail: "0.8mm | L | 綠色" },
+        { name: "6號", detail: "1.1mm | 紫色" },
+        { name: "7號", detail: "1.4mm | 灰色" },
+        { name: "8號", detail: "1.5mm | 黑色" },
+        { name: "綜合", detail: "0-5號 | 0.4-0.8mm" }
+    ];
+
+    const sizesTypeISoft = [
+        { name: "1號", detail: "0.45mm | SSS |橘色" },
+        { name: "2號", detail: "0.5mm | SS | 紅色" },
+        { name: "3號", detail: "0.6mm | S | 藍色" },
+        { name: "4號", detail: "0.7mm | M | 黃色" },
+        { name: "5號", detail: "0.8mm | L | 綠色" },
+        { name: "6號", detail: "1.1mm | 紫色" },
+        { name: "綜合", detail: "1-6號 | 0.45-1.1mm" }
+    ];
+
+    const sizesTypeL = [
+        { name: "0號", detail: "0.4mm | SSSS | 粉紅色" },
+        { name: "1號", detail: "0.45mm | SSS |橘色" },
+        { name: "2號", detail: "0.5mm | SS | 紅色" },
+        { name: "3號", detail: "0.6mm | S | 藍色" },
+        { name: "4號", detail: "0.7mm | M | 黃色" },
+        { name: "5號", detail: "0.8mm | L | 綠色" },
+        { name: "綜合", detail: "0-5號 | 0.4-0.8mm" }
+    ];
+
+    // 產品資料庫
+    const products = [
+        // --- 牙間刷 (卡裝) ---
+        { category: "牙間刷", type: "interdental-box", name: "【卡裝】I型牙間刷（一般刷毛）", price: 1780, unit: "盒", desc: "10卡", sizes: sizesTypeI },
+        { category: "牙間刷", type: "interdental-box", name: "【卡裝】I型牙間刷（超軟刷毛）", price: 1780, unit: "盒", desc: "10卡", sizes: sizesTypeISoft },
+        { category: "牙間刷", type: "interdental-box", name: "【卡裝】L型牙間刷", price: 1780, unit: "盒", desc: "10卡", sizes: sizesTypeL },
+        
+        // --- 牙間刷 (袋裝) ---
+        { category: "牙間刷", type: "interdental-bag", name: "【袋裝】I型牙間刷（一般刷毛）", price: 715, unit: "袋", desc: "25支 (需買偶數包)", sizes: sizesTypeI },
+        { category: "牙間刷", type: "interdental-bag", name: "【袋裝】I型牙間刷（超軟刷毛）", price: 715, unit: "袋", desc: "25支 (需買偶數包)", sizes: sizesTypeISoft },
+        { category: "牙間刷", type: "interdental-bag", name: "【袋裝】L型牙間刷", price: 715, unit: "袋", desc: "25支 (需買偶數包)", sizes: sizesTypeL },
+
+        // --- 一般牙刷 ---
+        { category: "一般牙刷", type: "general", name: "迷你至尊雙層刷毛牙刷", price: 1960, unit: "盒", desc: "14支" },
+        { category: "一般牙刷", type: "general", name: "至尊雙層刷毛牙刷", price: 1960, unit: "盒", desc: "14支" },
+        { category: "一般牙刷", type: "general", name: "深層潔淨牙刷（軟毛）", price: 1680, unit: "盒", desc: "14支" },
+        { category: "一般牙刷", type: "general", name: "深層潔淨牙刷（超軟毛）", price: 1680, unit: "盒", desc: "14支" },
+        { category: "一般牙刷", type: "general", name: "精選全效牙刷（軟毛）（一般刷頭）", price: 1400, unit: "盒", desc: "14支" },
+        { category: "一般牙刷", type: "general", name: "精選全效牙刷（超軟毛）（一般刷頭）", price: 1400, unit: "盒", desc: "14支" },
+        { category: "一般牙刷", type: "general", name: "精選全效牙刷（軟毛）（纖細刷頭）", price: 1400, unit: "盒", desc: "14支" },
+        { category: "一般牙刷", type: "general", name: "精選全效牙刷（超軟毛）（纖細刷頭）", price: 1400, unit: "盒", desc: "14支" },
+
+        // --- 兒童牙刷 ---
+        { category: "兒童牙刷", type: "general", name: "0－3歲迷你幼兒牙刷", price: 1820, unit: "盒", desc: "14支" },
+        { category: "兒童牙刷", type: "general", name: "3歲以上兒童牙刷", price: 1820, unit: "盒", desc: "14支" },
+
+        // --- 特殊牙刷 ---
+        { category: "特殊牙刷", type: "general", name: "單頭刷", price: 1960, unit: "盒", desc: "14支" },
+        { category: "特殊牙刷", type: "general", name: "間隙專用牙刷", price: 3920, unit: "盒", desc: "14支" },
+        { category: "特殊牙刷", type: "general", name: "加護型牙刷(紅色一般刷頭)", price: 2450, unit: "盒", desc: "14支, 口腔手術後使用" },
+        { category: "特殊牙刷", type: "general", name: "加護型牙刷(藍色纖細刷頭)", price: 2450, unit: "盒", desc: "14支, 口腔手術後使用" },
+        { category: "特殊牙刷", type: "general", name: "防敏感牙刷(牙週病適用)", price: 1750, unit: "盒", desc: "14支" },
+        { category: "特殊牙刷", type: "general", name: "植牙護理牙刷", price: 2380, unit: "盒", desc: "14支" },
+        { category: "特殊牙刷", type: "general", name: "矯正／植牙專用牙刷", price: 1750, unit: "盒", desc: "14支" },
+        { category: "特殊牙刷", type: "general", name: "舌苔清潔器", price: 3080, unit: "盒", desc: "14支" },
+
+        // --- 其他 ---
+        { category: "其他產品", type: "general", name: "膨脹牙線", price: 2500, unit: "盒", desc: "10卡／每卡40M" },
+        { category: "其他產品", type: "general", name: "植牙專用牙線", price: 4000, unit: "盒", desc: "10卡／每卡30條" },
+        { category: "其他產品", type: "general", name: "輕鬆剔", price: 2400, unit: "盒", desc: "10卡／每卡36支" },
+        { category: "其他產品", type: "general", name: "雙色牙菌斑顯示錠", price: 2520, unit: "盒", desc: "12卡／每卡10顆" },
+    ];
+
+    // --- 初始化網頁 ---
+    function init() {
+        const container = document.getElementById('product-container');
+        let currentCategory = "";
+
+        products.forEach((product, index) => {
+            // 如果換了分類，插入分類標題
+            if (product.category !== currentCategory) {
+                const title = document.createElement('div');
+                title.className = 'category-title';
+                title.innerText = product.category;
+                container.appendChild(title);
+                currentCategory = product.category;
+            }
+
+            const card = document.createElement('div');
+            card.className = 'product-card';
+
+            // 產品圖片（佔位）
+            const imgPlaceholder = document.createElement('div');
+            imgPlaceholder.className = 'product-image-placeholder';
+            imgPlaceholder.innerHTML = `<span>[圖片] ${product.name}</span>`;
+            // 若要加圖片，請將上行改成: 
+            // imgPlaceholder.innerHTML = `<img src="圖片路徑.jpg" alt="${product.name}">`;
+            card.appendChild(imgPlaceholder);
+
+            // 標題與價格
+            const header = document.createElement('div');
+            header.className = 'product-header';
+            header.innerHTML = `
+                <div class="product-name">${product.name} <span style="font-size:0.8em; opacity:0.8;">(${product.desc})</span></div>
+                <div class="product-price">$${product.price} / ${product.unit}</div>
+            `;
+            card.appendChild(header);
+
+            // 內容輸入區
+            if (product.sizes) {
+                // 有分尺寸的產品 (牙間刷)
+                const sizeList = document.createElement('div');
+                sizeList.className = 'size-list';
+                product.sizes.forEach((size, sizeIndex) => {
+                    const sizeItem = document.createElement('div');
+                    sizeItem.className = 'size-item';
+                    sizeItem.innerHTML = `
+                        <div>
+                            <div class="size-info"><strong>${size.name}</strong></div>
+                            <div class="size-detail">${size.detail}</div>
+                        </div>
+                        <input type="number" min="0" placeholder="0" 
+                               class="qty-input" 
+                               data-price="${product.price}" 
+                               data-name="${product.name} - ${size.name}"
+                               data-type="${product.type}">
+                    `;
+                    sizeList.appendChild(sizeItem);
+                });
+                card.appendChild(sizeList);
+            } else {
+                // 無分尺寸的產品 (一般/特殊)
+                const inputArea = document.createElement('div');
+                inputArea.style.textAlign = 'right';
+                inputArea.innerHTML = `
+                    <label>購買數量：</label>
+                    <input type="number" min="0" placeholder="0" 
+                           class="qty-input" 
+                           data-price="${product.price}" 
+                           data-name="${product.name}"
+                           data-type="${product.type}">
+                `;
+                card.appendChild(inputArea);
+            }
+
+            container.appendChild(card);
+        });
+
+        // 綁定輸入事件以即時更新金額
+        const inputs = document.querySelectorAll('.qty-input');
+        inputs.forEach(input => {
+            input.addEventListener('input', calculateTotal);
+        });
+    }
+
+    // --- 計算邏輯 ---
+    function calculateTotal() {
+        const inputs = document.querySelectorAll('.qty-input');
+        let totalBoxCount = 0; // 一般盒數
+        let totalBagCount = 0; // 袋裝總數
+        let rawTotalPrice = 0; // 原價總額
+
+        inputs.forEach(input => {
+            const val = parseInt(input.value) || 0;
+            const price = parseInt(input.getAttribute('data-price'));
+            const type = input.getAttribute('data-type');
+
+            if (val > 0) {
+                rawTotalPrice += val * price;
+                if (type === 'interdental-bag') {
+                    totalBagCount += val;
+                } else {
+                    totalBoxCount += val; // 其他都算1盒
+                }
+            }
+        });
+
+        // 袋裝換算：2包 = 1盒
+        const bagToBox = totalBagCount / 2; 
+        const totalEffectiveBoxes = totalBoxCount + bagToBox;
+
+        // 計算折扣
+        let discount = 1;
+        let discountText = "";
+
+        if (totalEffectiveBoxes >= 5) {
+            discount = 0.6;
+            discountText = "6折";
+        } else if (totalEffectiveBoxes >= 3) {
+            discount = 0.7;
+            discountText = "7折";
+        } else if (totalEffectiveBoxes >= 1) {
+            discount = 0.9;
+            discountText = "9折";
+        }
+
+        // 顯示結果
+        const finalPrice = Math.round(rawTotalPrice * discount);
+        
+        document.getElementById('total-box-count').innerText = totalEffectiveBoxes.toFixed(1) + " 盒";
+        document.getElementById('final-price').innerText = "$" + finalPrice.toLocaleString();
+        
+        const badge = document.getElementById('discount-display');
+        if (discountText) {
+            badge.innerText = discountText;
+            badge.style.display = 'inline-block';
+        } else {
+            badge.style.display = 'none';
+        }
+
+        return {
+            totalBagCount,
+            totalEffectiveBoxes,
+            rawTotalPrice,
+            finalPrice,
+            discountText
+        };
+    }
+
+    // --- 複製訂單功能 ---
+    function copyOrder() {
+        const calcResult = calculateTotal();
+        
+        // 防呆檢查：袋裝必須是2的倍數
+        if (calcResult.totalBagCount % 2 !== 0) {
+            alert(`⚠️ 注意：您目前的袋裝產品總數為 ${calcResult.totalBagCount} 包。\n根據規則，袋裝產品總數量必須是「2的倍數」（例如2包, 4包...）才能下單。\n請調整數量後再試一次。`);
+            return;
+        }
+
+        const inputs = document.querySelectorAll('.qty-input');
+        let orderDetails = "";
+        let hasItem = false;
+
+        inputs.forEach(input => {
+            const val = parseInt(input.value) || 0;
+            if (val > 0) {
+                hasItem = true;
+                const name = input.getAttribute('data-name');
+                const unit = input.getAttribute('data-type') === 'interdental-bag' ? '袋' : '盒';
+                orderDetails += `• ${name}：${val} ${unit}\n`;
+            }
+        });
+
+        if (!hasItem) {
+            alert("請先選擇至少一樣商品！");
+            return;
+        }
+
+        const textToCopy = `【訂購單】\n` +
+            orderDetails +
+            `------------------\n` +
+            `總數量(含袋裝換算)：${calcResult.totalEffectiveBoxes} 盒\n` +
+            `原始金額：$${calcResult.rawTotalPrice.toLocaleString()}\n` +
+            `符合折扣：${calcResult.discountText || '無'}\n` +
+            `★ 總金額：$${calcResult.finalPrice.toLocaleString()}`;
+
+        // 執行複製
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            alert("✅ 訂單內容已複製！\n請切換至 LINE 貼上傳送給我們。");
+        }).catch(err => {
+            console.error('複製失敗', err);
+            alert("複製失敗，請手動截圖");
+        });
+    }
+
+    // 啟動
+    init();
+
+</script>
+
+</body>
+</html>
